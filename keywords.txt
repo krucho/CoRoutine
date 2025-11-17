@@ -1,0 +1,40 @@
+#######################################
+# Syntax Coloring Map For CoroutineDSL
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+CoroutineTask	KEYWORD2
+TaskState	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+task	KEYWORD2
+task_return	KEYWORD2
+wait	KEYWORD2
+endtask	KEYWORD2
+endtask_return	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+start	KEYWORD2
+stop	KEYWORD2
+pause	KEYWORD2
+resume	KEYWORD2
+reset	KEYWORD2
+isRunning	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+TASK_STOPPED	LITERAL1
+TASK_RUNNING	LITERAL1
+TASK_PAUSED	LITERAL1
+
