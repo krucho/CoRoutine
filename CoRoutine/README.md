@@ -138,5 +138,6 @@ Este proyecto está disponible para uso libre.
 
 ## 👤 Autor
 
-TuNombre
+Alejandro Kruchowski + Cursor AI
+
 
