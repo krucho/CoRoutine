@@ -9,7 +9,7 @@ CoroutineDSL permite crear múltiples tareas que se ejecutan de forma concurrent
 ## ✨ Características
 
 - ✅ Sintaxis DSL simple y legible
-- ✅ Tareas no bloqueantes con `wait()`
+- ✅ Tareas no bloqueantes con `wait()`, `waitUntil()` y `waitWhile()`
 - ✅ Soporte para tareas con auto-loop y tareas con retorno
 - ✅ Control de estado (running, paused, stopped)
 - ✅ Múltiples tareas concurrentes
@@ -91,6 +91,25 @@ void loop() {
 }
 ```
 
+### Espera Condicional (waitUntil / waitWhile)
+
+```cpp
+task(buttonReader)
+{
+    // Espera HASTA QUE el botón sea presionado (no bloqueante)
+    waitUntil(digitalRead(BUTTON_PIN) == LOW);
+    
+    Serial.println("Botón presionado!");
+    wait(50);  // Debounce
+    
+    // Espera MIENTRAS el botón esté presionado
+    waitWhile(digitalRead(BUTTON_PIN) == LOW);
+    
+    Serial.println("Botón liberado!");
+}
+endtask
+```
+
 ## 🎮 Control de Tareas
 
 ```cpp
@@ -104,10 +123,12 @@ task.isRunning(); // Verifica si está ejecutándose
 
 ## 📁 Ejemplos
 
-El proyecto incluye dos ejemplos:
+El proyecto incluye varios ejemplos:
 
 1. **ExampleWithReturn**: Demuestra el uso de tareas con retorno de valores
 2. **TwoTasks**: Muestra cómo ejecutar múltiples tareas concurrentes con control manual
+3. **WaitUntilDemo**: Demuestra el uso de `waitUntil()` y `waitWhile()` para lectura de serial y detección de eventos
+4. **HardwareTest**: Ejemplo completo con 4 botones y 4 LEDs, incluyendo efectos PWM fade
 
 ## 🔧 API
 
@@ -116,21 +137,25 @@ El proyecto incluye dos ejemplos:
 - `task(name)`: Define una tarea void que se ejecuta en loop
 - `task_return(type, name)`: Define una tarea que retorna un valor
 - `wait(ms)`: Espera no bloqueante en milisegundos
+- `waitUntil(condition)`: Espera hasta que la condición sea verdadera (no bloqueante)
+- `waitWhile(condition)`: Espera mientras la condición sea verdadera (no bloqueante)
 - `endtask`: Cierra una tarea void (auto-loop)
 - `endtask_return(value)`: Cierra una tarea con retorno
 
 ### Clase CoroutineTask
 
 - `int pc`: Contador de programa (posición en la tarea)
+- `unsigned long waitStart`: Timestamp interno para delays no bloqueantes
 - `TaskState state`: Estado actual de la tarea
 - Métodos de control: `start()`, `stop()`, `pause()`, `resume()`, `reset()`, `isRunning()`
 
 ## 📝 Notas
 
 - Las tareas se ejecutan de forma cooperativa (no preemptivas)
-- Cada llamada a `wait()` crea un punto de pausa
+- Cada llamada a `wait()`, `waitUntil()` o `waitWhile()` crea un punto de pausa
 - Las tareas void se reinician automáticamente al llegar a `endtask`
 - Las tareas con retorno se detienen al llegar a `endtask_return()`
+- `waitUntil()` y `waitWhile()` verifican la condición en cada ciclo del loop sin bloquear
 
 ## 📄 Licencia
 
