@@ -13,12 +13,13 @@ class CoroutineTask {
 public:
     int pc = 0;              
     TaskState state = TASK_STOPPED;
+    unsigned long waitStart = 0; // Timestamp for non-blocking delays
 
-    void start()  { pc = 0; state = TASK_RUNNING; }
+    void start()  { pc = 0; state = TASK_RUNNING; waitStart = 0; }
     void stop()   { state = TASK_STOPPED; }
     void pause()  { if (state == TASK_RUNNING) state = TASK_PAUSED; }
     void resume() { if (state == TASK_PAUSED) state = TASK_RUNNING; }
-    void reset()  { pc = 0; }
+    void reset()  { pc = 0; waitStart = 0; }
 
     bool isRunning() { return state == TASK_RUNNING; }
 };
@@ -39,17 +40,32 @@ public:
         if (__task.pc == 0) __result = type{}; \
         switch(__task.pc) { case 0:
 
-// Delay no bloqueante
+// Delay no bloqueante (Improved: uses object state instead of static)
 #define wait(ms) \
-    do { static unsigned long __t##__LINE__; \
-         __task.pc = __LINE__; case __LINE__: \
-         if (__t##__LINE__ == 0) __t##__LINE__ = millis(); \
-         if (millis() - __t##__LINE__ < (unsigned long)(ms)) return; \
-         __t##__LINE__ = 0; } while (0)
+    do { \
+        __task.pc = __LINE__; case __LINE__: \
+        if (__task.waitStart == 0) __task.waitStart = millis(); \
+        if (millis() - __task.waitStart < (unsigned long)(ms)) return; \
+        __task.waitStart = 0; \
+    } while (0)
+
+// Espera HASTA QUE la condición sea verdadera (Yield si es falsa)
+#define waitUntil(condition) \
+    do { \
+        __task.pc = __LINE__; case __LINE__: \
+        if (!(condition)) return; \
+    } while (0)
+
+// Espera MIENTRAS la condición sea verdadera (Yield si es verdadera)
+#define waitWhile(condition) \
+    do { \
+        __task.pc = __LINE__; case __LINE__: \
+        if (condition) return; \
+    } while (0)
 
 // Cierra la tarea void y vuelve a empezar (auto-loop)
 #define endtask \
-        } __task.pc = 0; return; \
+        } __task.pc = 0; __task.waitStart = 0; return; \
     }
 
 // Cierra la tarea con retorno (se ejecuta una vez)
