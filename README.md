@@ -58,13 +58,18 @@ void loop() {
 ```cpp
 CoroutineTask sensorTask;
 
-task_return(int, readSensor)
+// IMPORTANTE: Para tareas con retorno usar value_task y wait_value
+value_task(int, readSensor)
 {
-    wait(100);  // Simula tiempo de lectura
-    int value = analogRead(A0);
-    wait(50);
-    endtask_return(value);  // Retorna y termina
+    int value;
+    
+    wait_value(100);  // Usar wait_value() en lugar de wait()
+    value = analogRead(A0);
+    wait_value(50);
+    
+    task_return(value);  // Retorna y termina
 }
+endtask_value  // Cierra la tarea con retorno
 
 void loop() {
     if (sensorTask.isRunning()) {
@@ -135,12 +140,16 @@ El proyecto incluye varios ejemplos:
 ### Macros DSL
 
 - `task(name)`: Define una tarea void que se ejecuta en loop
-- `task_return(type, name)`: Define una tarea que retorna un valor
-- `wait(ms)`: Espera no bloqueante en milisegundos
-- `waitUntil(condition)`: Espera hasta que la condición sea verdadera (no bloqueante)
-- `waitWhile(condition)`: Espera mientras la condición sea verdadera (no bloqueante)
-- `endtask`: Cierra una tarea void (auto-loop)
-- `endtask_return(value)`: Cierra una tarea con retorno
+- `value_task(type, name)`: Define una tarea que retorna un valor
+- `wait(ms)`: Espera no bloqueante en milisegundos (para `task`)
+- `wait_value(ms)`: Espera no bloqueante en milisegundos (para `value_task`)
+- `waitUntil(condition)`: Espera hasta que la condición sea verdadera (para `task`)
+- `waitUntil_value(condition)`: Espera hasta que la condición sea verdadera (para `value_task`)
+- `waitWhile(condition)`: Espera mientras la condición sea verdadera (para `task`)
+- `waitWhile_value(condition)`: Espera mientras la condición sea verdadera (para `value_task`)
+- `endtask`: Cierra el bloque de una tarea void
+- `task_return(value)`: Retorna un valor y cierra la tarea (usar dentro de `value_task`)
+- `endtask_value`: Cierra el bloque de una tarea con retorno
 
 ### Clase CoroutineTask
 
@@ -154,7 +163,7 @@ El proyecto incluye varios ejemplos:
 - Las tareas se ejecutan de forma cooperativa (no preemptivas)
 - Cada llamada a `wait()`, `waitUntil()` o `waitWhile()` crea un punto de pausa
 - Las tareas void se reinician automáticamente al llegar a `endtask`
-- Las tareas con retorno se detienen al llegar a `endtask_return()`
+- Las tareas con retorno se detienen al llegar a `task_return()`
 - `waitUntil()` y `waitWhile()` verifican la condición en cada ciclo del loop sin bloquear
 
 ## 📄 Licencia
