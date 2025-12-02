@@ -24,7 +24,7 @@ public:
     bool isRunning() { return state == TASK_RUNNING; }
 };
 
-// ========== DSL ==========
+// ========== DSL - Task Definitions ==========
 
 // Define una tarea void (auto-loop)
 #define task(name) \
@@ -33,14 +33,16 @@ public:
         switch(__task.pc) { case 0:
 
 // Define una tarea con retorno (se ejecuta una vez)
-#define task_return(type, name) \
+#define value_task(type, name) \
     type name(CoroutineTask &__task) { \
         static type __result = type{}; \
         if (!__task.isRunning()) return __result; \
         if (__task.pc == 0) __result = type{}; \
         switch(__task.pc) { case 0:
 
-// Delay no bloqueante (Improved: uses object state instead of static)
+// ========== DSL - Control Flow (for void tasks) ==========
+
+// Delay no bloqueante (para task)
 #define wait(ms) \
     do { \
         __task.pc = __LINE__; case __LINE__: \
@@ -68,9 +70,38 @@ public:
         } __task.pc = 0; __task.waitStart = 0; return; \
     }
 
-// Cierra la tarea con retorno (se ejecuta una vez)
-#define endtask_return(value) \
-        } __result = (value); __task.pc = 0; __task.state = TASK_STOPPED; return __result; \
+// ========== DSL - Control Flow (for value tasks) ==========
+
+// Delay no bloqueante (para value_task)
+#define wait_value(ms) \
+    do { \
+        __task.pc = __LINE__; case __LINE__: \
+        if (__task.waitStart == 0) __task.waitStart = millis(); \
+        if (millis() - __task.waitStart < (unsigned long)(ms)) return __result; \
+        __task.waitStart = 0; \
+    } while (0)
+
+// Espera HASTA QUE (para value_task)
+#define waitUntil_value(condition) \
+    do { \
+        __task.pc = __LINE__; case __LINE__: \
+        if (!(condition)) return __result; \
+    } while (0)
+
+// Espera MIENTRAS (para value_task)
+#define waitWhile_value(condition) \
+    do { \
+        __task.pc = __LINE__; case __LINE__: \
+        if (condition) return __result; \
+    } while (0)
+
+// Retorna un valor y detiene la tarea
+#define task_return(value) \
+        __result = (value); __task.pc = 0; __task.state = TASK_STOPPED;
+
+// Cierra la tarea con retorno (solo la llave externa + return dummy para compilador)
+#define endtask_value \
+        } __task.pc = 0; __task.state = TASK_STOPPED; return __result; \
     }
 
 #endif

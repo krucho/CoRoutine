@@ -15,15 +15,19 @@ task(blink)
 endtask
 
 // ----- Tarea con retorno (se ejecuta una vez) -----
-task_return(int, readSensor)
+// IMPORTANTE: Para tareas con retorno usar value_task y wait_value
+value_task(int, readSensor)
 {
-    wait(100);  // Simula tiempo de lectura del sensor
+    int value;  // Declarar variables al principio
     
-    int value = analogRead(A0);
-    wait(50);   // Procesamiento adicional
+    wait_value(100);  // Usar wait_value() en value_task
     
-    endtask_return(value);  // Retorna el valor y termina
+    value = analogRead(A0);
+    wait_value(50);
+    
+    task_return(value);  // Retorna el valor y termina
 }
+endtask_value  // Cierra la tarea con retorno
 
 void setup() {
     Serial.begin(9600);

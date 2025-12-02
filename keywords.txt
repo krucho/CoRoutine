@@ -14,10 +14,16 @@ TaskState	KEYWORD1
 #######################################
 
 task	KEYWORD2
+value_task	KEYWORD2
 task_return	KEYWORD2
 wait	KEYWORD2
+wait_value	KEYWORD2
+waitUntil	KEYWORD2
+waitUntil_value	KEYWORD2
+waitWhile	KEYWORD2
+waitWhile_value	KEYWORD2
 endtask	KEYWORD2
-endtask_return	KEYWORD2
+endtask_value	KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
